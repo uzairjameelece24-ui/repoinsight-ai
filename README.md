@@ -1,8 +1,8 @@
-# RepoInsight AI 🧠
+# RepoInsight AI
 
 RepoInsight AI is a highly performant, production-grade Retrieval-Augmented Generation (RAG) platform designed to ingest, index, and query entire Git codebases using advanced AI models. It acts as an intelligent assistant that instantly parses vast repositories, maps code structures semantically into a local Vector Database, and answers complex developer queries with precise file and line-number citations.
 
-## 🚀 Features
+## Features
 
 - **Multi-Codebase Context Management**: Seamlessly ingest multiple repositories (like `uvicorn`, `fastapi`, or your own projects), switch between them on the fly, and securely delete context via an O(1) disk teardown.
 - **Advanced RAG Pipeline**: Combines local SentenceTransformers embeddings (`all-MiniLM-L6-v2`) with ChromaDB for blazing-fast local vector search, passed to Groq's high-speed inference endpoints for instant semantic responses.
@@ -10,14 +10,14 @@ RepoInsight AI is a highly performant, production-grade Retrieval-Augmented Gene
 - **Premium Glassmorphism UI**: A completely custom, zero-dependency, dark-mode frontend built with pure HTML, CSS, and Vanilla JavaScript, featuring smooth micro-animations, context switching, and inline code snippet visualizations.
 - **Thread-Safe Backend architecture**: Built on FastAPI with asynchronous routing, thread-pooled disk I/O, strict Pydantic data validation, and custom structured JSON logging.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend**: FastAPI, Python 3.10+, Uvicorn, Pydantic
 - **AI & RAG**: Groq API, ChromaDB (Local Vector Store), SentenceTransformers
 - **Frontend**: Pure HTML5, CSS3 (Glassmorphism design), Vanilla JavaScript
 - **Version Control Handling**: GitPython
 
-## 💻 Installation & Setup
+## Installation & Setup
 
 1. **Clone the repository:**
    ```bash
@@ -46,14 +46,14 @@ RepoInsight AI is a highly performant, production-grade Retrieval-Augmented Gene
    ```bash
    python main.py
    ```
-   *The server will start on `http://localhost:8000/`. The beautiful frontend dashboard will be served directly at the root endpoint.*
+   *The server will start on `http://localhost:8000/`. The frontend dashboard will be served directly at the root endpoint.*
 
-## 🔍 How it Works
+## How it Works
 
 1. **Ingest:** Enter a Git URL into the dashboard. The backend performs a shallow clone, strips out noise (`node_modules`, binaries, `.git`), and divides the remaining source files into overlapping semantic chunks.
 2. **Embed:** Code chunks are passed through an embedding model and mapped into a high-dimensional vector space stored locally via ChromaDB.
 3. **Query:** When you ask a question (e.g. *"Where is the core router logic?"*), your query is embedded, and ChromaDB retrieves the Top-K most relevant code snippets.
 4. **Generate:** These snippets are injected into a highly defensive system prompt alongside your query and sent to the LLM to generate an accurate, grounded response with exact source code citations.
 
-## 📝 License
+## License
 This project is open-source and available under the MIT License.
