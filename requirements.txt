@@ -1,0 +1,31 @@
+# RepoInsight AI — Python dependencies
+# Pin exact versions for reproducible production builds.
+# Install with: pip install -r requirements.txt
+
+# ── Web framework ─────────────────────────────────────────────────────────────
+fastapi==0.115.5
+uvicorn[standard]==0.32.0
+
+# ── Configuration ─────────────────────────────────────────────────────────────
+pydantic==2.9.2
+pydantic-settings==2.6.1
+
+# ── API & Embeddings ──────────────────────────────────────────────────────────
+groq==0.8.0
+sentence-transformers==3.0.1
+
+# ── Vector database ───────────────────────────────────────────────────────────
+chromadb==0.6.3
+
+# ── Git integration ───────────────────────────────────────────────────────────
+gitpython==3.1.43
+
+# ── LangChain text splitting ──────────────────────────────────────────────────
+langchain-text-splitters==0.3.2
+
+# ── HTTP client (used internally by openai SDK and chromadb) ─────────────────
+httpx==0.27.2
+httpcore==1.0.6
+
+# ── Async support ─────────────────────────────────────────────────────────────
+anyio==4.6.2

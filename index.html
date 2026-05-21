@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoInsight AI — Codebase RAG Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Sleek HSL dark-mode theme */
+            --bg-base: #030712;
+            --bg-surface: rgba(17, 24, 39, 0.45);
+            --bg-card: rgba(31, 41, 55, 0.3);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-focus: rgba(99, 102, 241, 0.4);
+            
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #4b5563;
+            
+            --primary: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.15);
+            --error: #ef4444;
+            --error-glow: rgba(239, 68, 68, 0.1);
+            
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.2);
+            
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+        }
+
+        /* Custom Premium Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(99, 102, 241, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 95% 95%, rgba(16, 185, 129, 0.03) 0%, transparent 40%);
+        }
+
+        /* ── HEADER ── */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(3, 7, 18, 0.7);
+            backdrop-filter: blur(20px);
+            z-index: 10;
+            position: sticky;
+            top: 0;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary-gradient);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.05rem;
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 40%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 0.35rem 0.75rem;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse 2.5s infinite;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        main {
+            flex: 1;
+            max-width: 1350px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 2.5rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        /* ── LEFT SIDEBAR ── */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(24px);
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.3s ease;
+        }
+
+        .panel-card:hover {
+            border-color: rgba(255, 255, 255, 0.09);
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-primary);
+        }
+
+        .panel-title span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .text-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.7rem 0.9rem;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            color: white;
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ── INGESTION STATUS CARD ── */
+        .ingest-loader {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem 0;
+            text-align: center;
+        }
+
+        .spinner-ring {
+            width: 38px;
+            height: 38px;
+            border: 2px solid rgba(99, 102, 241, 0.1);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 0.85rem;
+        }
+
+        .loader-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            color: var(--text-primary);
+        }
+
+        .loader-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            animation: breathe 1.5s infinite ease-in-out;
+        }
+
+        /* ── DATABASE STATS PANEL ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .stat-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .stat-val {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            font-family: var(--font-mono);
+            letter-spacing: -0.5px;
+        }
+
+        .stat-lbl {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── RIGHT MAIN PANEL (RAG Chat UI) ── */
+        .chat-panel {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 7.5rem);
+            min-height: 550px;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.25rem;
+        }
+
+        .chat-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .chat-main-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .chat-sub-title {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .active-repo-badge {
+            background: rgba(99, 102, 241, 0.08);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            padding: 0.1rem 0.45rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+        }
+
+        .active-repo-badge.active {
+            background: rgba(16, 185, 129, 0.06);
+            color: #a7f3d0;
+            border-color: rgba(16, 185, 129, 0.18);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.05);
+        }
+
+        /* ── CHAT SCROLL AREA ── */
+        .chat-conversation {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            padding-right: 0.4rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .chat-placeholder {
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.85rem;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 380px;
+        }
+
+        .placeholder-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .placeholder-title {
+            font-weight: 700;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .placeholder-desc {
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+
+        /* ── MESSAGES ── */
+        .msg-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            max-width: 85%;
+            animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .msg-container.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .msg-container.assistant {
+            align-self: flex-start;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .msg-bubble {
+            padding: 0.9rem 1.15rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .user .msg-bubble {
+            background: var(--primary-gradient);
+            color: white;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.1);
+        }
+
+        .assistant .msg-bubble {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-bottom-left-radius: 2px;
+            box-shadow: var(--shadow-sm);
+            width: 100%;
+        }
+
+        .assistant .msg-bubble.system {
+            border: 1px solid rgba(16, 185, 129, 0.18);
+            background: rgba(16, 185, 129, 0.02);
+            color: #d1fae5;
+        }
+
+        .assistant .msg-bubble.error {
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.02);
+            color: #fca5a5;
+        }
+
+        /* ── AI TEXT & MARKDOWN STYLING ── */
+        .ai-text {
+            word-wrap: break-word;
+        }
+
+        .inline-code {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5px 3.5px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        /* ── CITATIONS / SOURCE CARDS ── */
+        .sources-section {
+            width: 100%;
+            margin-top: 1rem;
+            padding-top: 0.85rem;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .sources-header {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .sources-header svg {
+            width: 11px;
+            height: 11px;
+            color: var(--primary);
+        }
+
+        .sources-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .source-tag {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.35rem 0.55rem;
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .source-tag:hover {
+            background: rgba(99, 102, 241, 0.06);
+            border-color: rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+        }
+
+        .source-tag.active {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Sleek expanded code reader container */
+        .source-details {
+            background: #02040a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 0.4rem;
+            animation: slideUp 0.2s ease-out forwards;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .source-path-info {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 0.35rem;
+        }
+
+        .code-viewport {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: #e2e8f0;
+            white-space: pre;
+            overflow-x: auto;
+            max-height: 250px;
+            line-height: 1.45;
+            padding: 0.2rem 0;
+        }
+
+        /* ── CHAT INPUT BAR ── */
+        .chat-input-bar {
+            display: flex;
+            gap: 0.6rem;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.4rem;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input-bar:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.1);
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.55rem 0.75rem;
+            color: white;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: var(--primary-gradient);
+            border: none;
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .chat-send-btn:hover:not(:disabled) {
+            filter: brightness(1.15);
+            transform: scale(1.02);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .chat-send-btn svg {
+            width: 1rem;
+            height: 1rem;
+            fill: currentColor;
+            transform: translateX(1px);
+        }
+
+        /* Micro loading anim */
+        .loading-dots {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .loading-dots span {
+            width: 5px;
+            height: 5px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.95; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* Responsive styling */
+        @media (max-width: 950px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            .chat-panel {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">RI</div>
+            <div class="logo-text">RepoInsight AI</div>
+        </div>
+        <div class="status-container">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                Groq Connection Live
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main>
+        
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            
+            <!-- Context Menu Panel (NEW) -->
+            <div class="panel-card">
+                <div class="panel-title">
+                    <span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        Workspace Context
+                    </span>
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <select id="repo-select" class="text-input" onchange="switchRepoContext()" style="cursor: pointer; background: rgba(0,0,0,0.4); font-weight: 600;">
+                        <option value="">No Codebases Loaded</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Ingest Card -->
+            <div class="panel-card">
+                <div class="panel-title">
+                    <span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.3-2-1.9-3.6-3.9-3.9-1.4-.3-2.7 0-3.9.7M3 12a9 9 0 0 1 15-6.7M3 12a9 9 0 0 0 15 6.7M3 12h12M12 9l3 3-3 3"/></svg>
+                        Ingest Repository
+                    </span>
+                </div>
+                
+                <div id="ingest-form">
+                    <div class="input-group">
+                        <label class="input-label" for="repo-url">Git Repository URL</label>
+                        <input type="text" id="repo-url" class="text-input" placeholder="https://github.com/owner/repo.git" value="https://github.com/encode/uvicorn.git">
+                    </div>
+                    
+                    <button id="btn-ingest" class="btn-primary" onclick="ingestRepository()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        Start Ingestion
+                    </button>
+                </div>
+
+                <!-- Ingest Loader -->
+                <div id="ingest-loader" class="ingest-loader">
+                    <div class="spinner-ring"></div>
+                    <div class="loader-title" id="loader-title">Ingesting Repository</div>
+                    <div class="loader-sub">Cloning files, chunking, and embedding codebase...</div>
+                </div>
+            </div>
+
+            <!-- DB Statistics Card -->
+            <div class="panel-card">
+                <div class="panel-title">
+                    <span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+                        Database Statistics
+                    </span>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-vectors">0</div>
+                        <div class="stat-lbl">Vectors</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-model">384-D</div>
+                        <div class="stat-lbl">Local Embeds</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANEL (Chat Interface) -->
+        <div class="panel-card chat-panel">
+            
+            <div class="chat-header">
+                <div class="chat-title-group">
+                    <div class="chat-main-title">Semantic Code Explorer</div>
+                    <div class="chat-sub-title">
+                        Active context: <span id="active-repo-badge" class="active-repo-badge">None</span>
+                    </div>
+                </div>
+                <button id="btn-delete-repo" class="btn-primary" style="background:var(--error-glow); color:var(--error); border:1px solid rgba(239, 68, 68, 0.3); padding:0.4rem 0.8rem; width:auto; font-size:0.7rem; display:none; box-shadow:none; align-items:center;" onclick="deleteCurrentRepo()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete Codebase
+                </button>
+            </div>
+
+            <!-- Conversations Scroll -->
+            <div class="chat-conversation" id="chat-conversation">
+                
+                <!-- Initial Placeholder -->
+                <div class="chat-placeholder" id="chat-placeholder">
+                    <div class="placeholder-icon">🔍</div>
+                    <div class="placeholder-title">No Repository Loaded</div>
+                    <div class="placeholder-desc">
+                        Provide a Git Repository URL on the left panel to load and index the codebase, and start querying.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Input Bar -->
+            <div class="chat-input-bar">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Select or Ingest a repository on the left to ask questions..." disabled onkeydown="if(event.key === 'Enter') sendQuery()">
+                <button id="btn-send" class="chat-send-btn" onclick="sendQuery()" disabled>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Vanilla Javascript Logic -->
+    <script>
+        let currentRepoId = "";
+
+        // On document ready
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchStats();
+            fetchRepos();
+        });
+
+        // ── FETCH REPOS & CONTEXT SWITCHING ──
+        async function fetchRepos() {
+            try {
+                const response = await fetch("/api/repos");
+                if (response.ok) {
+                    const data = await response.json();
+                    const repos = data.repos || [];
+                    const select = document.getElementById("repo-select");
+                    
+                    if (repos.length === 0) {
+                        select.innerHTML = '<option value="">No Codebases Loaded</option>';
+                    } else {
+                        select.innerHTML = '<option value="">-- Select a Codebase --</option>';
+                        repos.forEach(r => {
+                            const opt = document.createElement("option");
+                            opt.value = r;
+                            opt.innerText = r;
+                            if (r === currentRepoId) opt.selected = true;
+                            select.appendChild(opt);
+                        });
+                        
+                        // Auto-select if none selected but repos exist
+                        if (!currentRepoId && repos.length > 0) {
+                            select.value = repos[0];
+                            switchRepoContext();
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch repos", err);
+            }
+        }
+
+        function switchRepoContext() {
+            const select = document.getElementById("repo-select");
+            const newRepoId = select.value;
+            
+            if (!newRepoId) {
+                resetChatContext();
+                return;
+            }
+            
+            currentRepoId = newRepoId;
+            updateActiveContextUI();
+            
+            const chatConv = document.getElementById("chat-conversation");
+            chatConv.innerHTML = "";
+            appendSystemMessage(`Switched context to: <b>${currentRepoId}</b>. Ask me anything about this codebase!`);
+        }
+        
+        function resetChatContext() {
+            currentRepoId = "";
+            const activeBadge = document.getElementById("active-repo-badge");
+            activeBadge.innerText = "None";
+            activeBadge.classList.remove("active");
+            
+            const chatInput = document.getElementById("chat-input");
+            chatInput.disabled = true;
+            chatInput.placeholder = "Select or Ingest a repository on the left to ask questions...";
+            document.getElementById("btn-send").disabled = true;
+            
+            document.getElementById("btn-delete-repo").style.display = "none";
+            
+            const chatConv = document.getElementById("chat-conversation");
+            chatConv.innerHTML = `
+                <div class="chat-placeholder" id="chat-placeholder">
+                    <div class="placeholder-icon">🔍</div>
+                    <div class="placeholder-title">No Repository Loaded</div>
+                    <div class="placeholder-desc">
+                        Provide a Git Repository URL on the left panel to load and index the codebase, and start querying.
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateActiveContextUI() {
+            const activeBadge = document.getElementById("active-repo-badge");
+            activeBadge.innerText = currentRepoId;
+            activeBadge.classList.add("active");
+            
+            const chatInput = document.getElementById("chat-input");
+            chatInput.disabled = false;
+            chatInput.placeholder = `Ask a question about ${currentRepoId}...`;
+            document.getElementById("btn-send").disabled = false;
+            
+            document.getElementById("btn-delete-repo").style.display = "flex";
+            
+            // Sync dropdown just in case
+            const select = document.getElementById("repo-select");
+            if (select.value !== currentRepoId) {
+                select.value = currentRepoId;
+            }
+        }
+
+        async function deleteCurrentRepo() {
+            if (!currentRepoId) return;
+            if (!confirm(`Are you sure you want to completely delete the codebase vectors and storage for '${currentRepoId}'?`)) {
+                return;
+            }
+            
+            const btn = document.getElementById("btn-delete-repo");
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Deleting...";
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch(`/api/repo/${currentRepoId}`, { method: "DELETE" });
+                if (response.ok) {
+                    alert(`Codebase '${currentRepoId}' deleted successfully.`);
+                    resetChatContext();
+                    fetchRepos();
+                    fetchStats();
+                } else {
+                    const data = await response.json();
+                    alert(`Deletion failed: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert(`Network error: ${err.message}`);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ── FETCH DATABASE STATS ──
+        async function fetchStats() {
+            try {
+                const response = await fetch("/api/stats");
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById("stat-vectors").innerText = (stats.total_vectors || 0).toLocaleString();
+                }
+            } catch (err) {
+                console.error("Failed to fetch stats", err);
+            }
+        }
+
+        // ── INGEST REPOSITORY ──
+        async function ingestRepository() {
+            const repoUrl = document.getElementById("repo-url").value.trim();
+            if (!repoUrl) {
+                alert("Please enter a valid Git repository URL!");
+                return;
+            }
+
+            // UI changes
+            document.getElementById("ingest-form").style.display = "none";
+            document.getElementById("ingest-loader").style.display = "flex";
+            document.getElementById("btn-ingest").disabled = true;
+
+            try {
+                const response = await fetch("/api/ingest", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ repo_url: repoUrl })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.status === "success") {
+                    currentRepoId = data.repo_id;
+                    updateActiveContextUI();
+                    
+                    // Clear and prepare chat area
+                    const chatConv = document.getElementById("chat-conversation");
+                    chatConv.innerHTML = ""; // Clear placeholder
+                    
+                    fetchRepos(); // Update dropdown
+                    
+                    appendSystemMessage(`Successfully indexed codebase: <b>${currentRepoId}</b> (${data.total_chunks} code chunks, ${data.total_files} files). Ask me anything about the architecture, components, or patterns!`);
+                    
+                    fetchStats();
+                    resetIngestUI();
+                } else {
+                    let detailMsg = "Unknown error during repository ingestion";
+                    if (data && data.detail) {
+                        detailMsg = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+                    }
+                    alert(`Ingestion failed: ${detailMsg}`);
+                    resetIngestUI();
+                }
+            } catch (err) {
+                alert(`Network error during ingestion: ${err.message}`);
+                resetIngestUI();
+            }
+        }
+
+        function resetIngestUI() {
+            document.getElementById("ingest-form").style.display = "block";
+            document.getElementById("ingest-loader").style.display = "none";
+            document.getElementById("btn-ingest").disabled = false;
+        }
+
+        // ── SEND QUERY (RAG FLOW) ──
+        async function sendQuery() {
+            const inputField = document.getElementById("chat-input");
+            const query = inputField.value.trim();
+            if (!query || !currentRepoId) return;
+
+            // Clear input
+            inputField.value = "";
+            inputField.disabled = true;
+            document.getElementById("btn-send").disabled = true;
+
+            // Append User message
+            appendMessage(query, "user");
+
+            // Append loading bubble for AI
+            const loadingBubbleId = appendMessage("Thinking... searching codebase and consulting Llama model...", "assistant loading-state");
+
+            try {
+                const response = await fetch("/api/query", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        repo_id: currentRepoId,
+                        query: query
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove loading bubble safely
+                const loadingBubble = document.getElementById(loadingBubbleId);
+                if (loadingBubble) {
+                    loadingBubble.remove();
+                }
+
+                if (response.ok) {
+                    appendAssistantResponse(data.answer, data.sources || []);
+                } else {
+                    let errMsg = "Query failed";
+                    if (data && data.detail) {
+                        if (typeof data.detail === "string") {
+                            errMsg = data.detail;
+                        } else if (Array.isArray(data.detail)) {
+                            errMsg = data.detail.map(e => e.msg || JSON.stringify(e)).join(", ");
+                        } else {
+                            errMsg = JSON.stringify(data.detail);
+                        }
+                    }
+                    appendMessage(`Error: ${errMsg}`, "assistant error-msg");
+                }
+            } catch (err) {
+                const loadingBubble = document.getElementById(loadingBubbleId);
+                if (loadingBubble) {
+                    loadingBubble.remove();
+                }
+                appendMessage(`Network error during query: ${err.message}`, "assistant error-msg");
+            } finally {
+                inputField.disabled = false;
+                inputField.focus();
+                document.getElementById("btn-send").disabled = false;
+            }
+        }
+
+        // ── HELPERS FOR CHAT BUBBLES ──
+        function appendMessage(text, className) {
+            const id = "msg_" + Math.random().toString(36).substr(2, 9);
+            const chatConv = document.getElementById("chat-conversation");
+            
+            const msgContainer = document.createElement("div");
+            msgContainer.className = `msg-container ${className.split(" ")[0]}`;
+            msgContainer.id = id;
+
+            const bubble = document.createElement("div");
+            bubble.className = `msg-bubble ${className.includes("error-msg") ? "error" : ""}`;
+            
+            if (className.includes("loading-state")) {
+                bubble.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div><p style="font-size:0.7rem; color:var(--text-secondary); margin-top:0.4rem;">${text}</p>`;
+            } else {
+                bubble.innerText = text;
+            }
+
+            msgContainer.appendChild(bubble);
+            chatConv.appendChild(msgContainer);
+            
+            // Auto scroll to bottom
+            chatConv.scrollTop = chatConv.scrollHeight;
+            return id;
+        }
+
+        function appendSystemMessage(htmlText) {
+            const chatConv = document.getElementById("chat-conversation");
+            const msgContainer = document.createElement("div");
+            msgContainer.className = "msg-container assistant";
+            
+            const bubble = document.createElement("div");
+            bubble.className = "msg-bubble system";
+            bubble.innerHTML = htmlText;
+            
+            msgContainer.appendChild(bubble);
+            chatConv.appendChild(msgContainer);
+            chatConv.scrollTop = chatConv.scrollHeight;
+        }
+
+        function appendAssistantResponse(answer, sources) {
+            const chatConv = document.getElementById("chat-conversation");
+            
+            const msgContainer = document.createElement("div");
+            msgContainer.className = "msg-container assistant";
+
+            const bubble = document.createElement("div");
+            bubble.className = "msg-bubble";
+            
+            // Basic markdown-like parsing for bold, italic, inline-code, and lines
+            let formattedAnswer = answer
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/`(.*?)`/g, '<code class="inline-code">$1</code>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n- (.*?)/g, '<br>• $1');
+
+            bubble.innerHTML = `<div class="ai-text">${formattedAnswer}</div>`;
+
+            // Sources references block
+            if (sources && sources.length > 0) {
+                const sourcesSection = document.createElement("div");
+                sourcesSection.className = "sources-section";
+                
+                const header = document.createElement("div");
+                header.className = "sources-header";
+                header.innerHTML = `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Source Code References (${sources.length})
+                `;
+                sourcesSection.appendChild(header);
+
+                const grid = document.createElement("div");
+                grid.className = "sources-grid";
+
+                sources.forEach((src, idx) => {
+                    const uniqueId = `src_${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    const tag = document.createElement("div");
+                    tag.className = "source-tag";
+                    const basename = src.file_path.split('/').pop();
+                    tag.innerHTML = `📄 ${basename}:${src.line_start}-${src.line_end}`;
+                    tag.title = `Full Path: ${src.file_path}`;
+                    
+                    const detailsContainer = document.createElement("div");
+                    detailsContainer.className = "source-details";
+                    detailsContainer.id = uniqueId;
+                    detailsContainer.style.display = "none";
+                    
+                    const pathInfo = document.createElement("div");
+                    pathInfo.className = "source-path-info";
+                    pathInfo.innerText = `${src.file_path} (Lines ${src.line_start} to ${src.line_end})`;
+                    
+                    const docPre = document.createElement("pre");
+                    docPre.className = "code-viewport";
+                    const codeElement = document.createElement("code");
+                    codeElement.innerText = src.content || "[No content retrieved]";
+                    docPre.appendChild(codeElement);
+                    
+                    detailsContainer.appendChild(pathInfo);
+                    detailsContainer.appendChild(docPre);
+                    
+                    tag.onclick = () => {
+                        const isHidden = detailsContainer.style.display === "none";
+                        // Collapse other tags in this block to maintain clean view
+                        bubble.querySelectorAll(".source-details").forEach(el => {
+                            if (el.id !== uniqueId) el.style.display = "none";
+                        });
+                        bubble.querySelectorAll(".source-tag").forEach(el => {
+                            el.classList.remove("active");
+                        });
+                        
+                        detailsContainer.style.display = isHidden ? "block" : "none";
+                        if (isHidden) {
+                            tag.classList.add("active");
+                            // Micro-scroll into viewport smoothly
+                            setTimeout(() => {
+                                detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }, 50);
+                        }
+                    };
+                    
+                    grid.appendChild(tag);
+                    sourcesSection.appendChild(detailsContainer);
+                });
+
+                sourcesSection.appendChild(grid);
+                bubble.appendChild(sourcesSection);
+            }
+
+            msgContainer.appendChild(bubble);
+            chatConv.appendChild(msgContainer);
+            chatConv.scrollTop = chatConv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
